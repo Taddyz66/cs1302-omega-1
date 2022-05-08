@@ -1,18 +1,25 @@
-package cs1302.game;
+package astroid;
+
 
 import java.util.BitSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.Event;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.BoundingBox;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 /**
@@ -49,6 +56,7 @@ public abstract class Game extends Region {
         super();
         setMinWidth(width);
         setMinHeight(height);
+        this.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(2), Insets.EMPTY)));
         this.bounds = new BoundingBox(0, 0, width, height);
         this.fpsTarget = Duration.millis(1000.0 / fps);
         addEventFilter(KeyEvent.KEY_PRESSED, event -> handleKeyPressed(event));
@@ -87,7 +95,10 @@ public abstract class Game extends Region {
      */
     private void handleKeyPressed(KeyEvent event) {
         logger.info(event.toString());
-        keysPressed.set(event.getCode().getCode());
+        if(!keysPressed.get(event.getCode().getCode())) {
+        	keysPressed.set(event.getCode().getCode());
+        }
+        //event.consume();
     } // handleKeyPressed
 
     /**
@@ -98,6 +109,32 @@ public abstract class Game extends Region {
         logger.info(event.toString());
         keysPressed.clear(event.getCode().getCode());
     } // handleKeyReleased
+    
+    
+    /**
+     * Return whether or not a key is currently pressed.
+     * @param key the key code to check
+     * @return {@code true} if the key is pressed; otherwise {@code false}
+     */
+    protected final boolean isKeyReleased(KeyCode key) {
+        return !keysPressed.get(key.getCode());
+    } // isKeyPressed
+    
+    /**
+     * Return whether or not a key is currently pressed. If the key is pressed, then
+     * {@code handler.run()} is run on the calling thread before the method returns.
+     * @param key the key code to check
+     * @param handler the object whose {@code run} method is invoked
+     * @return {@code true} if the key is pressed; otherwise {@code false}
+     */
+    protected final boolean isKeyReleased(KeyCode key, Runnable handler) {
+        if (isKeyReleased(key)) {
+            handler.run();
+            return true;
+        } else {
+            return false;
+        } // if
+    } // isKeyPressed
 
     /**
      * Return whether or not a key is currently pressed.
